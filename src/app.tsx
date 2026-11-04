@@ -33,7 +33,7 @@ function StoreRoutes() {
   const location = useLocation();
   useEffect(() => {
     const path = `/${location.pathname.split('/')[1]}`;
-    document.title = `${titles[path] ?? 'Página não encontrada'} · Buquê de Rosas · Demo`;
+    document.title = `${titles[path] ?? 'Página não encontrada'} · Encanto Natalino`;
   }, [location.pathname]);
   return <Routes><Route element={<Shell />}><Route index element={<HomePage />} /><Route path="produto" element={<ProductPage key={location.search} />} /><Route path="produto/:slug" element={<ProductPage key={location.pathname} />} /><Route path="colecao" element={<CollectionPage key={location.search} />} /><Route path="colecao/:slug" element={<CollectionPage key={location.pathname} />} /><Route path="carrinho" element={<CartPage />} /><Route path="checkout" element={<CheckoutPage />} /><Route path="pagamento" element={<PaymentPage key={location.search} />} /><Route path="cartao" element={<PaymentPage card key={location.search} />} /><Route path="obrigado" element={<ConfirmationPage />} /><Route path="acompanhar" element={<TrackingPage key={location.search} />} /><Route path="pedido" element={<OrderAlias />} /><Route path="conta" element={<AccountPage />} /><Route path="contato" element={<ContactPage />} /><Route path="atendimento" element={<SupportPage key={location.search} />} />{institutionalPages.map((page) => <Route key={page} path={page} element={<InstitutionalPage page={page} />} />)}<Route path="*" element={<LegacyRoute />} /></Route></Routes>;
 }

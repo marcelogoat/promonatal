@@ -10,7 +10,7 @@ export const emptyCheckout: CheckoutData = {
   nome: '', telefone: '', cpf: '', email: '', recebedor: '', mensagem: '', cep: '', endereco: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '', data: '', periodo: '', mode: 'padrao',
 };
 export const demoCheckout: CheckoutData = {
-  nome: 'Cliente Demonstração', telefone: '(11) 99999-0000', cpf: '529.982.247-25', email: 'cliente@example.com', recebedor: 'Pessoa Especial', mensagem: 'Um carinho para deixar seu dia mais bonito!', cep: '01310-100', endereco: 'Avenida Exemplo', numero: '123', complemento: '', bairro: 'Jardim das Flores', cidade: 'São Paulo', estado: 'SP', data: '', periodo: '', mode: 'padrao',
+  nome: 'Cliente Encanto Natalino', telefone: '(11) 98765-4321', cpf: '529.982.247-25', email: 'cliente@encantonatalino.com.br', recebedor: 'Cliente Encanto Natalino', mensagem: 'Que este Natal traga muita paz, luz e união para nosso lar!', cep: '01310-100', endereco: 'Avenida Paulista', numero: '1000', complemento: 'Apto 42', bairro: 'Bela Vista', cidade: 'São Paulo', estado: 'SP', data: '', periodo: '', mode: 'padrao',
 };
 export const today = () => {
   const date = new Date();
@@ -60,7 +60,10 @@ export function validCpf(value: string): boolean {
 }
 export function validateCheckout(data: CheckoutData, date = today()): Partial<Record<keyof CheckoutData, string>> {
   const errors: Partial<Record<keyof CheckoutData, string>> = {};
-  const required: (keyof CheckoutData)[] = ['nome', 'recebedor', 'endereco', 'numero', 'bairro', 'cidade'];
+  if (!data.recebedor || !data.recebedor.trim()) {
+    data.recebedor = data.nome.trim();
+  }
+  const required: (keyof CheckoutData)[] = ['nome', 'endereco', 'numero', 'bairro', 'cidade'];
   for (const key of required) if (!data[key].trim()) errors[key] = 'Preencha este campo.';
   if (data.nome.trim().split(/\s+/).length < 2) errors.nome = 'Informe nome e sobrenome.';
   for (const [key, value] of Object.entries(data)) if (value.length > 200) errors[key as keyof CheckoutData] = 'Use no máximo 200 caracteres.';

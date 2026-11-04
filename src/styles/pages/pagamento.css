@@ -13,7 +13,6 @@
     .pay__sub{ font-size:13px; color:var(--muted-warm); }
     .pay__sub strong{ color:var(--muted); font-weight:700; }
 
-    
     .pay__status{
       display:inline-flex; align-items:center; gap:8px;
       margin-top:12px; padding:8px 16px; border-radius:999px;
@@ -31,7 +30,6 @@
     .pay__status.is-paid .pay__dot{ background:var(--success); animation:none; }
     .pay__status.is-expired .pay__dot{ background:var(--muted-warm); animation:none; }
 
-    
     .pay__qr-card{
       position:relative;
       margin-top:18px; padding:24px 22px 22px;
@@ -51,6 +49,8 @@
     .pay__qr-frame{
       width:min(208px, 62vw); margin:0 auto;
       padding:8px; background:#fff;
+      border-radius:12px;
+      border:1px solid var(--line);
     }
     .pay__qr-frame img{
       width:100%; aspect-ratio:1/1; object-fit:contain;
@@ -58,7 +58,6 @@
     }
     .pay__qr-frame .skeleton{ width:100%; aspect-ratio:1/1; border-radius:10px; }
 
-    
     .pay__timer{
       margin-top:18px;
       display:flex; align-items:baseline; justify-content:center; gap:8px;
@@ -66,15 +65,15 @@
     .pay__timer-num{
       font-size:32px; font-weight:800; letter-spacing:-.02em;
       font-variant-numeric:tabular-nums;
+      color:var(--ink);
     }
     .pay__timer-label{ font-size:12.5px; color:var(--muted-warm); }
     .pay__timer.is-low .pay__timer-num{ color:var(--accent); }
 
-    .pay__total{ margin-top:4px; font-size:14px; color:var(--muted); }
+    .pay__total{ margin-top:4px; font-size:14px; color:var(--muted); line-height:1.45; }
     .pay__total strong{ color:var(--ink); }
 
-    
-    .pay__copy{ margin-top:18px; text-align:left; }
+    .pay__copy{ margin-top:20px; text-align:left; }
     .pay__copy-label{
       display:block;
       font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
@@ -95,35 +94,79 @@
       background:var(--action); color:#fff;
       display:flex; align-items:center; justify-content:center;
       transition:background .18s ease, transform .12s ease;
+      cursor:pointer; border:none;
     }
     .pay__copy-btn:hover{ background:var(--action-hover); }
     .pay__copy-btn:active{ transform:translateY(1px); }
     .pay__copy-btn svg{ width:19px; height:19px; }
-    .pay__copy-btn.is-copied{ background:var(--success); }
-    .pay__copy-hint{
-      margin-top:8px; font-size:12px; font-weight:600; color:var(--muted-warm);
-    }
-    .pay__copy-row:has(.is-copied) + .pay__copy-hint{ color:var(--success); }
+    .pay__copy-btn.is-copied{ background:#059669; }
 
-    
-    .pay__steps{ margin-top:22px; text-align:left; }
-    .pay__steps h2{ font-size:15px; font-weight:800; margin-bottom:11px; }
-    .pay__steps ol{ counter-reset:step; display:grid; gap:10px; }
+    .pay__copy-full-btn{
+      margin-top:10px; width:100%; height:48px; border-radius:12px;
+      font-size:14.5px; font-weight:700;
+      display:inline-flex; align-items:center; justify-content:center; gap:9px;
+      background:#00875a; color:#fff; border:none; cursor:pointer;
+      transition:all .2s ease;
+      box-shadow:0 4px 14px rgba(0,135,90,.25);
+    }
+    .pay__copy-full-btn:hover{
+      background:#006644;
+      transform:translateY(-1px);
+      box-shadow:0 6px 18px rgba(0,135,90,.32);
+    }
+    .pay__copy-full-btn.is-copied{
+      background:#059669;
+      box-shadow:0 4px 14px rgba(5,150,105,.30);
+    }
+    .pay__copy-full-btn .icon{ width:19px; height:19px; }
+
+    .pay__copy-hint{
+      margin-top:8px; font-size:12px; font-weight:600; color:var(--muted-warm); text-align:center;
+    }
+
+    /* Passo a Passo do PIX */
+    .pay__steps{
+      margin-top:24px; padding:18px;
+      background:#f8fafc; border:1px solid #e2e8f0;
+      border-radius:16px; text-align:left;
+    }
+    .pay__steps-title{
+      display:flex; align-items:center; gap:8px;
+      font-size:15px; font-weight:800; color:#0f172a;
+      margin:0 0 14px;
+    }
+    .pay__steps-title .icon{
+      color:#d97706; width:18px; height:18px;
+    }
+    .pay__steps ol{
+      counter-reset:step; display:grid; gap:12px;
+      list-style:none; padding:0; margin:0;
+    }
     .pay__steps li{
       counter-increment:step;
-      display:flex; gap:11px; align-items:flex-start;
-      font-size:13.5px; line-height:1.5; color:var(--ink-soft);
+      display:flex; gap:12px; align-items:flex-start;
+      font-size:13.5px; line-height:1.5; color:#334155;
     }
-    .pay__steps li strong{ color:var(--ink); }
+    .pay__steps li strong{
+      color:#0f172a; font-weight:700;
+    }
     .pay__steps li::before{
       content:counter(step);
       flex:none; width:22px; height:22px; margin-top:1px;
       display:inline-flex; align-items:center; justify-content:center;
-      background:var(--accent-soft); color:var(--accent);
+      background:#00875a; color:#ffffff;
       border-radius:999px; font-weight:800; font-size:11px;
     }
+    .pay__steps-confirm{
+      margin-top:14px; padding:11px 13px;
+      background:#ecfdf5; border:1px solid #a7f3d0;
+      border-radius:10px; display:flex; align-items:center; gap:9px;
+      font-size:12.5px; line-height:1.45; color:#065f46;
+    }
+    .pay__steps-confirm .icon{
+      color:#059669; flex:none; width:18px; height:18px;
+    }
 
-    
     .pay__note{
       margin-top:18px; padding:13px 14px;
       background:var(--accent-soft); border-radius:var(--r-sm);
@@ -133,7 +176,6 @@
     .pay__note a{ color:var(--accent); font-weight:700; }
     .pay__note a:hover{ text-decoration:underline; }
 
-    
     .pay__paid{ text-align:center; padding:34px 20px; margin-top:18px; }
     .pay__paid svg{ width:52px; height:52px; margin:0 auto 14px; color:var(--success); }
     .pay__paid h2{ font-size:20px; }

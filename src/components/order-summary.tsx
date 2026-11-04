@@ -5,7 +5,7 @@ import { type Order } from '@/domain/storage';
 
 export const orderLabel = (order: Order) => `#${order.id.slice(5, 13).toUpperCase()}`;
 export const orderStatuses = { pending: 'Aguardando pagamento', paid: 'Pagamento confirmado', cancelled: 'Pedido cancelado' };
-export const stages = ['Pedido confirmado', 'Floricultura selecionada', 'Preparando suas flores', 'Saiu para entrega', 'Entregue com carinho'];
+export const stages = ['Pedido confirmado', 'Separando seu pedido', 'Embalando decorações', 'Saiu para entrega', 'Entregue com carinho'];
 export const orderDate = (value: string) => new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
 
 export function OrderSummary({ order }: { order: Order }) {
@@ -14,14 +14,14 @@ export function OrderSummary({ order }: { order: Order }) {
     <div><dt>Pedido</dt><dd>{orderLabel(order)}</dd></div>
     <div><dt>Data</dt><dd>{orderDate(order.createdAt)}</dd></div>
     <div><dt>Quem recebe</dt><dd>{order.customer.recebedor}</dd></div>
-    <div><dt>Endereço</dt><dd>{order.customer.endereco}, {order.customer.numero}<br />{order.customer.complemento && <>{order.customer.complemento}<br /></>}{order.customer.bairro}<br />{order.customer.cidade} · {order.customer.estado}</dd></div>
+    <div><dt>Endereço</dt><dd>{order.customer.endereco}, {order.customer.numero}<br />{order.customer.complemento && <>{order.customer.complemento}<br /></>}{order.customer.bairro}<br />{order.customer.cidade} – {order.customer.estado}</dd></div>
     <div><dt>Entrega</dt><dd>{deliveryModes[order.mode].label}{order.customer.data && <><br />{order.customer.data.split('-').reverse().join('/')}<br />{order.customer.periodo}</>}</dd></div>
     <div><dt>Pagamento</dt><dd>{orderStatuses[order.status]}</dd></div>
     <div><dt>Frete</dt><dd>{total.shipping ? money(total.shipping) : 'Grátis'}</dd></div>
-    {total.discount > 0 && <div><dt>Desconto</dt><dd>− {money(total.discount)}</dd></div>}
-    {order.orderBump && <div><dt>Flores extras (30% OFF)</dt><dd>{money(order.orderBump.priceCents)}</dd></div>}
+    {total.discount > 0 && <div><dt>Desconto</dt><dd>– {money(total.discount)}</dd></div>}
+    {order.orderBump && <div><dt>Item extra (30% OFF)</dt><dd>{money(order.orderBump.priceCents)}</dd></div>}
     <div className="confirm-details__total"><dt>Total</dt><dd data-total>{money(total.total)}</dd></div>
-  </dl><div className="stack order-items">{order.items.map((item) => { const product = productById(item.productId); return <Link className="order-item" key={itemKey(item)} to={`/produto?id=${product.id}`}><img src={product.image} alt="" width={56} height={56} /><div><strong>{product.name}</strong><p className="muted small">{item.quantity} × {money(product.price_cents)}</p>{item.message && <p className="small">“{item.message}”</p>}</div></Link>; })}{order.orderBump && (() => { const product = productById(order.orderBump.productId); return <Link className="order-item" to={`/produto?id=${product.id}`}><img src={product.image} alt="" width={56} height={56} /><div><strong>Flores extras · {product.name}</strong><p className="muted small">1 × {money(order.orderBump.priceCents)} · 30% OFF</p></div></Link>; })()}</div>{order.customer.mensagem && <p className="order-message">“{order.customer.mensagem}”</p>}</section>;
+  </dl><div className="stack order-items">{order.items.map((item) => { const product = productById(item.productId); return <Link className="order-item" key={itemKey(item)} to={`/produto/${product.slug}`}><img src={product.image} alt="" width={56} height={56} /><div><strong>{product.name}</strong><p className="muted small">{item.quantity} × {money(product.price_cents)}</p>{item.message && <p className="small">“{item.message}”</p>}</div></Link>; })}{order.orderBump && (() => { const product = productById(order.orderBump.productId); return <Link className="order-item" to={`/produto/${product.slug}`}><img src={product.image} alt="" width={56} height={56} /><div><strong>Item extra – {product.name}</strong><p className="muted small">1 × {money(order.orderBump.priceCents)} (30% OFF)</p></div></Link>; })()}</div>{order.customer.mensagem && <p className="order-message">“{order.customer.mensagem}”</p>}</section>;
 }
 
 export function OrderList({ orders }: { orders: Order[] }) {

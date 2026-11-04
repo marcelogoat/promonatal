@@ -1,3 +1,9 @@
+
+.brand{display:inline-flex;align-items:center;text-decoration:none}
+.brand__logo-img{height:96px;width:auto;max-width:300px;object-fit:contain;display:block}
+@media(min-width:640px){.brand__logo-img{height:112px;max-width:340px}}
+.site-footer .brand__logo-img{height:116px;max-width:360px;margin:0 auto}
+
 .icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:22px;height:22px;vertical-align:middle}
 .icon svg{width:100%;height:100%}
 .btn .icon{width:18px;height:18px}
@@ -15,7 +21,7 @@
 #conteudo:focus{outline:none}
 .small{font-size:12px}
 .text-link{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
-.title-serif{font-family:var(--font-display);font-weight:400}
+.title-serif{font-family:var(--font-display);font-weight:700;letter-spacing:-.025em}
 .field{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700}
 .field input,.field select,.field textarea{width:100%}
 .field__hint{font-size:11px;color:var(--muted);font-weight:400}
@@ -27,7 +33,7 @@ button:disabled{cursor:not-allowed}
 .demo-notice>.icon{width:18px;height:18px;margin-top:2px}
 .empty-state{max-width:520px;margin:32px auto;padding:42px 18px;text-align:center}
 .empty-state>.icon{display:flex;width:46px;height:46px;margin:0 auto 22px;color:var(--accent)}
-.empty-state h1{font-family:var(--font-display);font-size:34px;font-weight:400}
+.empty-state h1{font-family:var(--font-display);font-size:30px;font-weight:700;letter-spacing:-.02em}
 .modal{padding:0;border:0;border-radius:22px;background:var(--bg);color:var(--ink);width:min(480px,calc(100% - 32px));max-height:85dvh;box-shadow:0 24px 100px #0003}
 .modal::backdrop{background:rgba(12,12,12,.42);backdrop-filter:blur(3px)}
 .modal__content{overflow:auto;max-height:85dvh}
@@ -61,7 +67,7 @@ button:disabled{cursor:not-allowed}
 .location-confirm__error{color:#dc2626;font-size:12px}
 .menu-intro{margin-bottom:18px}
 .menu-intro>span{font-size:12px;color:var(--muted)}
-.menu-intro h3{font-family:var(--font-display);font-size:28px;font-weight:400;margin-top:4px}
+.menu-intro h3{font-family:var(--font-display);font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:4px}
 .menu-section-title{font-size:13px;margin:22px 0 12px}
 .menu-extra{display:grid;gap:16px;margin-top:24px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;font-weight:700}
 .catmenu__icon>.icon{width:25px;height:25px}
@@ -70,7 +76,7 @@ button:disabled{cursor:not-allowed}
 .searchbox>.icon{position:absolute;left:14px;color:var(--muted);width:18px;height:18px;pointer-events:none}
 .searchbox>.icon svg{position:static;left:auto}
 .catalog-group{margin-top:26px}
-.category-heading{font-family:var(--font-display);font-size:21px;font-weight:400;margin-bottom:13px}
+.category-heading{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-.02em;margin-bottom:13px}
 .load-more{text-align:center;padding:26px 0 8px}
 .qadd>.icon{width:18px;height:18px}
 .pitem__body{min-width:0}

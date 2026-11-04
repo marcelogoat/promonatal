@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <linearGradient id="cardBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="65%" stop-color="#fafdff"/>
+      <stop offset="100%" stop-color="#f0f7f3"/>
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0f3d20" flood-opacity="0.12"/>
+    </filter>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="45%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="pineGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e7e43"/>
+      <stop offset="50%" stop-color="#14532d"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="redVelvet" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="50%" stop-color="#b91c1c"/>
+      <stop offset="100%" stop-color="#7f1d1d"/>
+    </linearGradient>
+    <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="500" fill="url(#cardBg)"/>
+  
+  <g fill="#e0eee6" opacity="0.6">
+    <circle cx="45" cy="60" r="2"/>
+    <circle cx="85" cy="110" r="1.5"/>
+    <circle cx="340" cy="70" r="2.5"/>
+    <circle cx="370" cy="140" r="1.5"/>
+    <circle cx="30" cy="220" r="2"/>
+    <circle cx="360" cy="280" r="2"/>
+    <circle cx="60" cy="380" r="1.5"/>
+    <circle cx="330" cy="420" r="2"/>
+  </g>
+  
+  <ellipse cx="200" cy="445" rx="100" ry="14" fill="#0f3d20" opacity="0.08"/>
+  
+  
+    <g filter="url(#dropShadow)">
+      <path d="M130 380 L130 250 L200 190 L270 250 L270 380" fill="none" stroke="#78350f" stroke-width="10" stroke-linecap="round"/>
+      <polygon points="120,250 200,180 280,250 270,265 200,205 130,265" fill="#92400e"/>
+    </g>
+    <circle cx="200" cy="130" r="35" fill="url(#starGlow)"/>
+    <polygon points="200,90 206,120 235,120 212,136 220,165 200,146 180,165 188,136 165,120 194,120" fill="url(#gold)" filter="url(#softGlow)"/>
+    <ellipse cx="165" cy="275" rx="12" ry="14" fill="#b45309"/>
+    <path d="M150 380 L155 300 Q165 290 175 300 L180 380 Z" fill="#78350f"/>
+    <line x1="145" y1="260" x2="145" y2="380" stroke="#d97706" stroke-width="4" stroke-linecap="round"/>
+    <ellipse cx="235" cy="295" rx="10" ry="12" fill="#0284c7"/>
+    <path d="M220 380 L225 315 Q235 310 245 315 L255 380 Z" fill="#0369a1"/>
+    <line x1="185" y1="360" x2="215" y2="385" stroke="#78350f" stroke-width="4"/>
+    <line x1="215" y1="360" x2="185" y2="385" stroke="#78350f" stroke-width="4"/>
+    <rect x="180" y="340" width="40" height="22" rx="6" fill="#ca8a04"/>
+    <ellipse cx="200" cy="342" rx="14" ry="10" fill="#ffffff"/>
+    <ellipse cx="192" cy="342" rx="6" ry="6" fill="#fed7aa"/>
+  
+</svg>

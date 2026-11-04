@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/pix/status/:id", "destination": "/api/pix/status?id=:id" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

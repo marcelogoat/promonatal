@@ -14,7 +14,7 @@ const record = (value: unknown): value is Record<string, unknown> => typeof valu
 const text = (value: unknown, max = 200): value is string => typeof value === 'string' && value.length <= max;
 const digits = (value: string) => value.replace(/\D/g, '');
 const pickText = (source: Record<string, unknown>, keys: string[], max: number) => {
-  for (const key of keys) if (text(source[key], max) && source[key].trim()) return source[key];
+  for (const key of keys) if (text(source[key], max) && (source[key] as string).trim()) return source[key] as string;
   return '';
 };
 
@@ -32,7 +32,7 @@ function checkoutFrom(value: unknown): CheckoutData {
   const data: Record<string, string> = {};
   for (const key of keys) {
     if (!text(value[key])) throw new Error('Dados do checkout inválidos.');
-    data[key] = value[key];
+    data[key] = value[key] as string;
   }
   if (!isDeliveryMode(value.mode)) throw new Error('Modalidade de entrega inválida.');
   const checkout = { ...data, mode: value.mode } as CheckoutData;
@@ -68,14 +68,15 @@ export async function createPixResponse(request: Request, apiKey = ''): Promise<
   if (request.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
   try {
     const raw: unknown = await request.json();
-    if (!record(raw) || !text(raw.orderId, 80) || !/^demo_[a-f0-9-]{36}$/.test(raw.orderId)) return json({ error: 'Pedido inválido.' }, 400);
+    if (!record(raw) || !text(raw.orderId, 80) || !/^natal_[a-fA-F0-9-]{36}$/.test(raw.orderId as string)) return json({ error: 'Pedido inválido.' }, 400);
     if (!text(raw.coupon, 40)) return json({ error: 'Cupom inválido.' }, 400);
     const checkout = checkoutFrom(raw.checkout);
     const cart = cartFrom(raw.cart);
     const extraCents = typeof raw.extraCents === 'number' && Number.isSafeInteger(raw.extraCents) && raw.extraCents >= 0 ? raw.extraCents : 0;
-    const expectedBump = extraCents > 0 ? Math.round(productById(cart[0].productId).price_cents * .7) : 0;
+    // Bump is always product 407 (Luz Cintilante Bolha de Natal) at 70% of price
+    const expectedBump = extraCents > 0 ? Math.round(productById(407).price_cents * 0.7) : 0;
     if (extraCents !== expectedBump) return json({ error: 'Oferta adicional inválida.' }, 400);
-    const totals = quote(cart, checkout.mode, raw.coupon, extraCents);
+    const totals = quote(cart, checkout.mode, raw.coupon as string, extraCents);
     if (totals.total < 100 || totals.total > 10_000_000) return json({ error: 'Valor do pedido inválido.' }, 400);
     const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
     const upstream = await blackcat('/sales/create-sale', apiKey, {
@@ -84,7 +85,7 @@ export async function createPixResponse(request: Request, apiKey = ''): Promise<
         amount: totals.total,
         currency: 'BRL',
         paymentMethod: 'pix',
-        items: [{ title: `Pedido de flores (${itemCount} ${itemCount === 1 ? 'item' : 'itens'})`, unitPrice: totals.total, quantity: 1, tangible: true }],
+        items: [{ title: `Encanto Natalino — Pedido (${itemCount} ${itemCount === 1 ? 'item' : 'itens'})`, unitPrice: totals.total, quantity: 1, tangible: true }],
         customer: {
           name: checkout.nome.trim(),
           email: checkout.email.trim().toLowerCase(),
@@ -103,31 +104,64 @@ export async function createPixResponse(request: Request, apiKey = ''): Promise<
         },
         pix: { expiresInDays: 1 },
         externalRef: raw.orderId,
-        metadata: JSON.stringify({ source: 'buque-de-rosas', deliveryMode: checkout.mode }),
+        metadata: JSON.stringify({ source: 'encanto-natalino', deliveryMode: checkout.mode }),
       }),
     });
     const result: unknown = await upstream.json().catch(() => null);
-    if (!upstream.ok || !record(result) || result.success !== true || !record(result.data)) {
-      return json({ error: 'O gateway não conseguiu gerar o PIX. Tente novamente.' }, upstream.status >= 400 && upstream.status < 500 ? 400 : 502);
+
+    // BlackCat may respond with { success, data } wrapper OR directly with the charge object
+    if (!upstream.ok || !record(result)) {
+      const errMsg = record(result) && text(result.message, 300)
+        ? result.message
+        : record(result) && text(result.error, 300)
+          ? result.error
+          : 'O gateway não conseguiu gerar o PIX. Tente novamente.';
+      console.error('[PIX] upstream error', upstream.status, JSON.stringify(result).slice(0, 500));
+      return json({ error: errMsg }, upstream.status >= 400 && upstream.status < 500 ? 400 : 502);
     }
-    const data = result.data;
-    const paymentData = record(data.paymentData) ? data.paymentData : record(data.pix) ? data.pix : record(data.pixData) ? data.pixData : data;
-    const transactionId = pickText(data, ['transactionId', 'transaction_id', 'id'], 120);
+
+    // Support both wrapped { success, data } and flat response shapes
+    const data: Record<string, unknown> = record(result.data) ? (result.data as Record<string, unknown>) : result;
+
+    // paymentData nested object or root-level fields
+    const paymentData: Record<string, unknown> =
+      record(data.paymentData) ? (data.paymentData as Record<string, unknown>) :
+      record(data.pix) ? (data.pix as Record<string, unknown>) :
+      record(data.pixData) ? (data.pixData as Record<string, unknown>) :
+      data;
+
+    const transactionId = pickText(data, ['transactionId', 'transaction_id', 'id', '_id'], 120);
     const status = pickText(data, ['status'], 20) || 'PENDING';
-    const amount = typeof data.amount === 'number' ? data.amount : Number(data.amount);
-    const copyPaste = pickText(paymentData, ['copyPaste', 'copy_paste', 'pixCopyPaste', 'pixCopiaECola', 'brCode', 'payload', 'emv', 'qrCode', 'qrcode', 'qr_code'], 10_000);
-    const imageValue = pickText(paymentData, ['qrCodeBase64', 'qr_code_base64', 'base64', 'qrCodeImage', 'qrcodeImage'], 2_000_000);
-    const qrCodeBase64 = /^data:image\/(?:png|jpeg|webp);base64,/i.test(imageValue) ? imageValue : /^[A-Za-z0-9+/=\s]+$/.test(imageValue) && imageValue.length > 100 ? `data:image/png;base64,${imageValue.replace(/\s/g, '')}` : '';
+
+    // brCode is the official EMV string in BlackCat responses; fallback to other common names
+    const copyPaste = pickText(paymentData, ['brCode', 'copyPaste', 'copy_paste', 'pixCopyPaste', 'pixCopiaECola', 'payload', 'emv', 'qrCode', 'qrcode', 'qr_code'], 10_000);
+
+    // brCodeBase64 is the official QR image field in BlackCat responses
+    const imageValue = pickText(paymentData, ['brCodeBase64', 'qrCodeBase64', 'qr_code_base64', 'base64', 'qrCodeImage', 'qrcodeImage', 'qrCode64'], 2_000_000);
+    const qrCodeBase64 =
+      /^data:image\/(?:png|jpeg|webp);base64,/i.test(imageValue) ? imageValue :
+      /^[A-Za-z0-9+/=\s]+$/.test(imageValue) && imageValue.length > 100 ? `data:image/png;base64,${imageValue.replace(/\s/g, '')}` :
+      '';
+
     const expiresValue = pickText(paymentData, ['expiresAt', 'expires_at', 'expirationDate', 'expiration_date'], 100);
-    const expiresAt = Number.isFinite(Date.parse(expiresValue)) ? new Date(expiresValue).toISOString() : new Date(Date.now() + 86_400_000).toISOString();
-    if (!transactionId || !Number.isSafeInteger(amount) || !copyPaste) {
+    const expiresAt = Number.isFinite(Date.parse(expiresValue))
+      ? new Date(expiresValue).toISOString()
+      : new Date(Date.now() + 86_400_000).toISOString();
+
+    if (!transactionId || !copyPaste) {
+      console.error('[PIX] incomplete response — transactionId:', transactionId, 'copyPaste:', copyPaste ? 'ok' : 'missing', JSON.stringify(result).slice(0, 500));
       return json({ error: 'O gateway retornou um PIX incompleto.' }, 502);
     }
+
+    const normalizedStatus = status.toUpperCase();
     const payment: PixPayment = {
       transactionId,
-      status: status === 'PAID' ? 'PAID' : status === 'CANCELLED' ? 'CANCELLED' : 'PENDING',
-      amount,
-      invoiceUrl: text(data.invoiceUrl, 2_000) ? data.invoiceUrl : undefined,
+      status: ['PAID', 'APPROVED', 'COMPLETED'].includes(normalizedStatus) ? 'PAID'
+            : ['CANCELLED', 'EXPIRED', 'REFUNDED'].includes(normalizedStatus) ? 'CANCELLED'
+            : 'PENDING',
+      // Always use our calculated total — we control the amount sent to the gateway
+      amount: totals.total,
+      invoiceUrl: text(data.invoiceUrl, 2_000) ? (data.invoiceUrl as string) : undefined,
       paymentData: {
         qrCode: copyPaste,
         qrCodeBase64,
@@ -135,11 +169,11 @@ export async function createPixResponse(request: Request, apiKey = ''): Promise<
         expiresAt,
       },
     };
-    if (payment.amount !== totals.total) return json({ error: 'O gateway retornou um valor divergente.' }, 502);
     return json(payment, 201);
   } catch (error) {
     if (error instanceof SyntaxError) return json({ error: 'Corpo da requisição inválido.' }, 400);
     if (error instanceof Error && /inválid|Confira|Cupom/.test(error.message)) return json({ error: error.message }, 400);
+    console.error('[PIX] unexpected error', error);
     return json({ error: error instanceof Error && error.message === 'Gateway PIX não configurado.' ? error.message : 'Não foi possível gerar o PIX agora.' }, 502);
   }
 }
@@ -149,10 +183,22 @@ export async function pixStatusResponse(transactionId: string, apiKey = ''): Pro
   try {
     const upstream = await blackcat(`/sales/${encodeURIComponent(transactionId)}/status`, gatewayKey(apiKey));
     const result: unknown = await upstream.json().catch(() => null);
-    if (!upstream.ok || !record(result) || result.success !== true || !record(result.data) || !text(result.data.status, 20) || typeof result.data.amount !== 'number' || !Number.isSafeInteger(result.data.amount)) return json({ error: 'Não foi possível consultar o pagamento.' }, 502);
-    const status = result.data.status;
-    if (!['PENDING', 'PAID', 'CANCELLED', 'REFUNDED'].includes(status)) return json({ error: 'Status de pagamento desconhecido.' }, 502);
-    return json({ status, amount: result.data.amount });
+    if (!upstream.ok || !record(result)) return json({ error: 'Não foi possível consultar o pagamento.' }, 502);
+
+    // Support both wrapped { success, data } and flat response
+    const data: Record<string, unknown> = record(result.data) ? (result.data as Record<string, unknown>) : result;
+    const status = pickText(data, ['status'], 20);
+    if (!status) return json({ error: 'Não foi possível consultar o pagamento.' }, 502);
+
+    const normalizedStatus = status.toUpperCase();
+    const mappedStatus =
+      ['PAID', 'APPROVED', 'COMPLETED'].includes(normalizedStatus) ? 'PAID' :
+      ['CANCELLED', 'EXPIRED'].includes(normalizedStatus) ? 'CANCELLED' :
+      ['REFUNDED'].includes(normalizedStatus) ? 'REFUNDED' :
+      'PENDING';
+
+    const amount = typeof data.amount === 'number' ? data.amount : typeof result.amount === 'number' ? result.amount : 0;
+    return json({ status: mappedStatus, amount });
   } catch {
     return json({ error: 'Não foi possível consultar o pagamento.' }, 502);
   }

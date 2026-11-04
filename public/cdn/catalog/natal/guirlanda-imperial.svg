@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <linearGradient id="cardBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="65%" stop-color="#fafdff"/>
+      <stop offset="100%" stop-color="#f0f7f3"/>
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0f3d20" flood-opacity="0.12"/>
+    </filter>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="45%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="pineGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e7e43"/>
+      <stop offset="50%" stop-color="#14532d"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="redVelvet" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="50%" stop-color="#b91c1c"/>
+      <stop offset="100%" stop-color="#7f1d1d"/>
+    </linearGradient>
+    <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="500" fill="url(#cardBg)"/>
+  
+  <g fill="#e0eee6" opacity="0.6">
+    <circle cx="45" cy="60" r="2"/>
+    <circle cx="85" cy="110" r="1.5"/>
+    <circle cx="340" cy="70" r="2.5"/>
+    <circle cx="370" cy="140" r="1.5"/>
+    <circle cx="30" cy="220" r="2"/>
+    <circle cx="360" cy="280" r="2"/>
+    <circle cx="60" cy="380" r="1.5"/>
+    <circle cx="330" cy="420" r="2"/>
+  </g>
+  
+  <ellipse cx="200" cy="445" rx="100" ry="14" fill="#0f3d20" opacity="0.08"/>
+  
+  
+    <g filter="url(#dropShadow)">
+      <circle cx="200" cy="230" r="120" fill="none" stroke="url(#pineGrad)" stroke-width="64"/>
+      <circle cx="200" cy="230" r="130" fill="none" stroke="#16a34a" stroke-width="12" stroke-dasharray="10 24"/>
+      <circle cx="200" cy="230" r="105" fill="none" stroke="#15803d" stroke-width="16" stroke-dasharray="15 30"/>
+    </g>
+    <g fill="#78350f" stroke="#451a03" stroke-width="1.5">
+      <ellipse cx="140" cy="190" rx="14" ry="18"/>
+      <ellipse cx="260" cy="190" rx="14" ry="18"/>
+      <ellipse cx="200" cy="340" rx="16" ry="20"/>
+    </g>
+    <g fill="url(#redVelvet)" filter="url(#dropShadow)">
+      <circle cx="130" cy="250" r="7"/><circle cx="142" cy="255" r="6"/><circle cx="136" cy="264" r="6"/>
+      <circle cx="270" cy="250" r="7"/><circle cx="258" cy="255" r="6"/><circle cx="264" cy="264" r="6"/>
+      <circle cx="160" cy="310" r="7"/><circle cx="170" cy="316" r="6"/>
+      <circle cx="240" cy="310" r="7"/><circle cx="230" cy="316" r="6"/>
+    </g>
+    <g fill="#fef08a" filter="url(#softGlow)">
+      <circle cx="180" cy="125" r="4"/><circle cx="220" cy="125" r="4"/>
+      <circle cx="115" cy="210" r="4"/><circle cx="285" cy="210" r="4"/>
+      <circle cx="150" cy="290" r="4"/><circle cx="250" cy="290" r="4"/>
+    </g>
+    <g filter="url(#dropShadow)">
+      <path d="M200 120 C160 80 120 100 145 135 C170 160 195 130 200 120 Z" fill="url(#redVelvet)"/>
+      <path d="M200 120 C240 80 280 100 255 135 C230 160 205 130 200 120 Z" fill="url(#redVelvet)"/>
+      <ellipse cx="200" cy="125" rx="14" ry="12" fill="#7f1d1d"/>
+      <path d="M192 135 Q170 180 160 230 L178 220 L195 140 Z" fill="url(#redVelvet)"/>
+      <path d="M208 135 Q230 180 240 230 L222 220 L205 140 Z" fill="url(#redVelvet)"/>
+    </g>
+  
+</svg>

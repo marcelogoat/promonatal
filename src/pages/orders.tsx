@@ -1,8 +1,10 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { DemoNotice, EmptyState, Icon, Modal, PageFrame } from '@/components/ui';
 import { OrderList, OrderSummary, orderLabel, stages } from '@/components/order-summary';
 import { advanceOrder } from '@/domain/storage';
+import { trackGoogleConversion } from '@/domain/analytics';
+import { quote } from '@/domain/commerce';
 import { useStore } from '@/store';
 import confirmationCss from '@/styles/pages/obrigado.css?raw';
 import trackingCss from '@/styles/pages/acompanhar.css?raw';
@@ -11,6 +13,16 @@ export function ConfirmationPage() {
   const [params] = useSearchParams();
   const { data } = useStore();
   const order = data.orders.find((item) => item.id === params.get('id'));
+
+  useEffect(() => {
+    if (!order) return;
+    const key = `gads_conv_${order.id}`;
+    if (!sessionStorage.getItem(key)) {
+      const orderTotal = quote(order.items, order.mode, order.coupon, order.orderBump?.priceCents ?? 0).total;
+      trackGoogleConversion(orderTotal, order.id);
+      sessionStorage.setItem(key, '1');
+    }
+  }, [order]);
   if (!order) return <main className="container"><EmptyState title="Pedido não encontrado" text="Consulte seus pedidos demonstrativos neste navegador." to="/acompanhar" label="Meus pedidos" icon="receipt" /></main>;
   const paid = order.status === 'paid';
   return <PageFrame name="obrigado" css={confirmationCss}><main className={`container confirm${paid ? '' : ' confirm--pending'}`}><header className="confirm-hero"><div className="confirm-seal"><Icon name={paid ? 'check' : 'receipt'} /></div><span className="confirm-pill">{paid ? 'Pagamento demonstrativo aprovado' : order.status === 'cancelled' ? 'Pedido cancelado' : 'Aguardando pagamento'}</span><h1 className="confirm-title">{paid ? <>Seu carinho está <em>a caminho!</em></> : 'Seu pedido demonstrativo'}</h1><p className="confirm-headline">{paid ? 'Flores escolhidas com amor. Acompanhe cada etapa do seu pedido abaixo.' : 'Confira os detalhes e o status do pedido.'}</p></header><DemoNotice /><OrderSummary order={order} /><div className="confirm-actions"><Link className="btn btn--action btn--block" to={`/acompanhar?id=${order.id}`}><Icon name="moto" />Acompanhar meu pedido</Link>{order.status === 'pending' && <Link className="btn btn--primary btn--block" to={`/pagamento?id=${order.id}`}>Ir para pagamento</Link>}<Link className="btn btn--soft btn--block" to="/">Continuar comprando</Link><p className="muted">Guarde o número {orderLabel(order)}. O pedido fica salvo somente neste navegador.</p></div><p className="confirm-help">Precisa de ajuda? <Link to="/atendimento">Fale com a gente</Link>.</p></main></PageFrame>;
