@@ -11,8 +11,8 @@ export type CartItem = {
 
 export const deliveryModes = {
   padrao: { label: 'Frete Grátis Brasil', description: 'Envio seguro com rastreamento (5 a 12 dias úteis)', cents: 0 },
-  expressa: { label: 'Envio Expresso Prioritário', description: 'Despacho prioritário com rastreio (4 a 5 dias úteis)', cents: 1990 },
-  vip: { label: 'Sedex / Turbo Natal', description: 'Entrega rápida com seguro postal total (2 a 3 dias úteis)', cents: 3490 },
+  expressa: { label: 'Envio Expresso Prioritário', description: 'Despacho prioritário com rastreio (7 a 9 dias úteis)', cents: 1990 },
+  vip: { label: 'Sedex / Turbo Natal', description: 'Entrega rápida com seguro postal total (5 a 7 dias úteis)', cents: 3490 },
   agendada: { label: 'Envio Programado', description: 'Despacho com data programada', cents: 0 },
 };
 export type DeliveryMode = keyof typeof deliveryModes;
