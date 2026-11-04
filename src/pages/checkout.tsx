@@ -4,7 +4,6 @@ import { EmptyState, Icon, PageFrame, Totals } from '@/components/ui';
 import { money, productById } from '@/domain/catalog';
 import { changeQuantity, deliveryModes, itemKey, quote } from '@/domain/commerce';
 import {
-  demoCheckout,
   emptyCheckout,
   formatCep,
   formatCpf,
@@ -49,9 +48,6 @@ export function CheckoutPage() {
 
   const orderTotals = quote(data.cart, values.mode, data.coupon, orderBump ? bumpPrice : 0);
 
-  const shippingSectionRef = useRef<HTMLDivElement>(null);
-  const hasScrolledToShippingRef = useRef(false);
-
   const isAddressComplete = Boolean(
     values.cep.replace(/\D/g, '').length === 8 &&
     values.endereco.trim().length >= 2 &&
@@ -66,20 +62,6 @@ export function CheckoutPage() {
   const [_cepMessage, setCepMessage] = useState('Digite o CEP para buscar o endereço.');
   const [emailFocused, setEmailFocused] = useState(false);
 
-  useEffect(() => {
-    if (step === 2 && isAddressComplete) {
-      if (!hasScrolledToShippingRef.current) {
-        hasScrolledToShippingRef.current = true;
-        const timer = setTimeout(() => {
-          shippingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 120);
-        return () => clearTimeout(timer);
-      }
-    } else if (!isAddressComplete) {
-      hasScrolledToShippingRef.current = false;
-    }
-  }, [step, isAddressComplete]);
-
   const identificationKeys: (keyof CheckoutData)[] = ['nome', 'telefone', 'email'];
   const addressKeys: (keyof CheckoutData)[] = [
     'cep',
@@ -91,16 +73,6 @@ export function CheckoutPage() {
     'estado',
     'mode',
   ];
-
-  function fillDemo() {
-    setValues({
-      ...demoCheckout,
-      mensagem: values.mensagem || demoCheckout.mensagem,
-    });
-    setErrors({});
-    setCepStatus('success');
-    setCepMessage('Endereço de teste preenchido.');
-  }
 
   function change(key: keyof CheckoutData, value: string) {
     if (key === 'mode' && !isDeliveryMode(value)) return;
@@ -118,6 +90,21 @@ export function CheckoutPage() {
     if (key === 'mensagem') transact((state) => ({ ...state, cardMessage: formatted }));
   }
 
+  function handleNumericKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (
+      ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(
+        event.key
+      ) ||
+      event.ctrlKey ||
+      event.metaKey
+    ) {
+      return;
+    }
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
   function field(
     key: keyof CheckoutData,
     label: string,
@@ -125,7 +112,10 @@ export function CheckoutPage() {
     optional = false,
     placeholder = ''
   ) {
+    const isNumeric = key === 'telefone' || key === 'cpf' || key === 'cep';
     const maxLength = key === 'telefone' ? 15 : key === 'cpf' ? 14 : key === 'cep' ? 9 : 200;
+    const inputType = isNumeric ? 'tel' : type;
+
     return (
       <div className="field">
         <label htmlFor={key}>
@@ -135,9 +125,12 @@ export function CheckoutPage() {
         <input
           id={key}
           name={key}
-          type={type}
+          type={inputType}
+          inputMode={isNumeric ? 'numeric' : undefined}
+          pattern={isNumeric ? '[0-9]*' : undefined}
           placeholder={placeholder}
           value={values[key]}
+          onKeyDown={isNumeric ? handleNumericKeyDown : undefined}
           onChange={(event) => change(key, event.target.value)}
           required={!optional}
           maxLength={maxLength}
@@ -494,9 +487,6 @@ export function CheckoutPage() {
                   <span className="step__num">1</span>
                   <h2>Identificação do Comprador</h2>
                 </div>
-                <button type="button" className="btn-demo-fill" onClick={fillDemo}>
-                  ⚡ Preencher teste
-                </button>
               </div>
 
               <div className="fields">
@@ -583,9 +573,12 @@ export function CheckoutPage() {
                     <input
                       id="cep"
                       name="cep"
-                      type="text"
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       placeholder="00000-000"
                       value={values.cep}
+                      onKeyDown={handleNumericKeyDown}
                       onChange={(e) => change('cep', e.target.value)}
                       maxLength={9}
                       required
@@ -647,7 +640,7 @@ export function CheckoutPage() {
               )}
 
               {isAddressComplete && (
-                <div ref={shippingSectionRef} className="shipping-block shipping-section-fadein">
+                <div className="shipping-block shipping-section-fadein">
                   <div className="shipping-block__header">
                     <svg
                       className="shipping-truck-icon"
@@ -802,7 +795,7 @@ export function CheckoutPage() {
                 </label>
 
                 <div className="order-bump__cpf">
-                  {field('cpf', 'CPF (para emissão da nota fiscal)', 'text', false, '000.000.000-00')}
+                  {field('cpf', 'CPF (para emissão da nota fiscal)', 'tel', false, '000.000.000-00')}
                 </div>
               </div>
 
