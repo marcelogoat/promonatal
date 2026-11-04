@@ -1,4 +1,14 @@
 
+html, body {
+  touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+input, select, textarea {
+  font-size: 16px;
+}
+
 .brand{display:inline-flex;align-items:center;text-decoration:none}
 .brand__logo-img{height:96px;width:auto;max-width:300px;object-fit:contain;display:block}
 @media(min-width:640px){.brand__logo-img{height:112px;max-width:340px}}
