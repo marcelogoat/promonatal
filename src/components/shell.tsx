@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { categories, occasions, products } from '@/domain/catalog';
+import { trackFbPageView } from '@/domain/analytics';
 import { useStore } from '@/store';
 import { Brand, Icon, Modal, type IconName } from './ui';
 
@@ -30,6 +31,10 @@ export function Shell() {
     const timer = setInterval(() => setNotice((value) => (value + 1) % notices.length), 4500);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    trackFbPageView();
+  }, [location.pathname]);
 
   useEffect(() => {
     setMenu(false);

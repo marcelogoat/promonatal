@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { DemoNotice, EmptyState, Icon, PageFrame } from '@/components/ui';
 import { orderLabel } from '@/components/order-summary';
-import { trackGoogleConversion } from '@/domain/analytics';
+import { trackGoogleConversion, trackFbPurchase } from '@/domain/analytics';
 import { money } from '@/domain/catalog';
 import { quote } from '@/domain/commerce';
 import { getPixStatus } from '@/domain/pix';
@@ -22,11 +22,21 @@ export function PaymentPage({ card = false }: { card?: boolean }) {
 
   useEffect(() => {
     if (!order) return;
-    const key = `gads_conv_${order.id}`;
-    if (!sessionStorage.getItem(key)) {
-      const orderTotal = quote(order.items, order.mode, order.coupon, order.orderBump?.priceCents ?? 0).total;
+    const gadsKey = `gads_conv_${order.id}`;
+    const fbKey = `fb_conv_${order.id}`;
+    const orderTotal = quote(order.items, order.mode, order.coupon, order.orderBump?.priceCents ?? 0).total;
+
+    if (!sessionStorage.getItem(gadsKey)) {
       trackGoogleConversion(orderTotal, order.id);
-      sessionStorage.setItem(key, '1');
+      sessionStorage.setItem(gadsKey, '1');
+    }
+
+    if (!sessionStorage.getItem(fbKey)) {
+      const contentIds = order.items.map((i) => i.productId);
+      if (order.orderBump) contentIds.push(order.orderBump.productId);
+      const numItems = order.items.reduce((t, i) => t + i.quantity, 0) + (order.orderBump ? 1 : 0);
+      trackFbPurchase(orderTotal, order.id, contentIds, numItems);
+      sessionStorage.setItem(fbKey, '1');
     }
   }, [order]);
 

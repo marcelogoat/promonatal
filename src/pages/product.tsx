@@ -5,6 +5,7 @@ import { addItem } from '@/domain/commerce';
 import { useStore } from '@/store';
 import { EmptyState, Icon, PageFrame } from '@/components/ui';
 import { ProductCard } from '@/components/product-card';
+import { trackFbInitiateCheckout } from '@/domain/analytics';
 import css from '@/styles/pages/produto.css?inline';
 
 export function ProductPage() {
@@ -143,6 +144,11 @@ export function ProductPage() {
     }
 
     setShowOptionsModal(false);
+    try {
+      trackFbInitiateCheckout(currentPrice, 1, [product.id]);
+    } catch (e) {
+      console.warn('[Meta Pixel] erro InitiateCheckout:', e);
+    }
     if (
       transact((state) => ({
         ...state,

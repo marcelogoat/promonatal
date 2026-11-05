@@ -15,7 +15,7 @@ import {
 } from '@/domain/checkout';
 import { createOrder, isDeliveryMode, safeRandomUUID } from '@/domain/storage';
 import { createPix } from '@/domain/pix';
-import { trackGoogleConversion } from '@/domain/analytics';
+import { trackGoogleConversion, trackFbInitiateCheckout, trackFbPurchase } from '@/domain/analytics';
 import { useStore } from '@/store';
 import css from '@/styles/pages/checkout.css?raw';
 
@@ -47,6 +47,20 @@ export function CheckoutPage() {
   const bumpPrice = 3290; // R$32,90 fixo
 
   const orderTotals = quote(data.cart, values.mode, data.coupon, orderBump ? bumpPrice : 0);
+
+  useEffect(() => {
+    if (!data.cart.length) return;
+    const key = `fb_ic_${data.cart.map((i) => i.productId).join('_')}`;
+    if (!sessionStorage.getItem(key)) {
+      const totalCents = quote(data.cart, values.mode, data.coupon, 0).total;
+      trackFbInitiateCheckout(
+        totalCents,
+        data.cart.reduce((t, i) => t + i.quantity, 0),
+        data.cart.map((i) => i.productId)
+      );
+      sessionStorage.setItem(key, '1');
+    }
+  }, []);
 
   const isAddressComplete = Boolean(
     values.cep.replace(/\D/g, '').length === 8 &&
@@ -253,13 +267,19 @@ export function CheckoutPage() {
       const pix = await createPix(id, cart, coupon, values, bump?.priceCents ?? 0);
       const order = createOrder(values, cart, coupon, bump, id, pix);
 
-      // Track conversion immediately upon PIX generation
+      // Track conversion immediately upon PIX generation (Google Ads + Meta Pixel)
       try {
         const orderTotal = quote(cart, values.mode, coupon, bump?.priceCents ?? 0).total;
         trackGoogleConversion(orderTotal, id);
         sessionStorage.setItem(`gads_conv_${id}`, '1');
+
+        const contentIds = cart.map((i) => i.productId);
+        if (bump) contentIds.push(bump.productId);
+        const numItems = cart.reduce((t, i) => t + i.quantity, 0) + (bump ? 1 : 0);
+        trackFbPurchase(orderTotal, id, contentIds, numItems);
+        sessionStorage.setItem(`fb_conv_${id}`, '1');
       } catch (err) {
-        console.warn('[Google Ads] falha ao registrar conversão no checkout:', err);
+        console.warn('[Analytics] falha ao registrar conversão no checkout:', err);
       }
 
       if (
