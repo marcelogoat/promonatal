@@ -23,10 +23,17 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return result as T;
 }
 
-export async function createPix(orderId: string, cart: CartItem[], coupon: string, checkout: CheckoutData, extraCents = 0): Promise<PixPayment> {
+export async function createPix(
+  orderId: string,
+  cart: CartItem[],
+  coupon: string,
+  checkout: CheckoutData,
+  extraCents = 0,
+  utms?: Record<string, string>
+): Promise<PixPayment> {
   const payment = await api<PixPayment>('/api/pix/create', {
     method: 'POST',
-    body: JSON.stringify({ orderId, cart, coupon, checkout, extraCents }),
+    body: JSON.stringify({ orderId, cart, coupon, checkout, extraCents, utms }),
   });
   if (!payment.paymentData.qrCodeBase64) {
     payment.paymentData.qrCodeBase64 = await QRCode.toDataURL(payment.paymentData.copyPaste, { width: 512, margin: 2, errorCorrectionLevel: 'M' });

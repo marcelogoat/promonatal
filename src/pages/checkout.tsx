@@ -16,6 +16,7 @@ import {
 import { createOrder, isDeliveryMode, safeRandomUUID } from '@/domain/storage';
 import { createPix } from '@/domain/pix';
 import { trackGoogleConversion, trackFbInitiateCheckout, trackFbPurchase } from '@/domain/analytics';
+import { withUtms, getStoredUtms } from '@/domain/utm';
 import { useStore } from '@/store';
 import css from '@/styles/pages/checkout.css?raw';
 
@@ -264,7 +265,7 @@ export function CheckoutPage() {
 
     try {
       const bump = orderBump && bumpProduct ? { productId: bumpProduct.id, priceCents: bumpPrice } : null;
-      const pix = await createPix(id, cart, coupon, values, bump?.priceCents ?? 0);
+      const pix = await createPix(id, cart, coupon, values, bump?.priceCents ?? 0, getStoredUtms());
       const order = createOrder(values, cart, coupon, bump, id, pix);
 
       // Track conversion immediately upon PIX generation (Google Ads + Meta Pixel)
@@ -291,7 +292,7 @@ export function CheckoutPage() {
           cardMessage: '',
         }))
       ) {
-        navigate(`/pagamento?id=${encodeURIComponent(id)}`);
+        navigate(withUtms(`/pagamento?id=${encodeURIComponent(id)}`));
       }
     } catch (error) {
       setPaymentError(

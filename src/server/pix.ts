@@ -103,6 +103,7 @@ export async function createPixResponse(request: Request, apiKey = ''): Promise<
     const totals = quote(cart, checkout.mode, raw.coupon as string, extraCents);
     if (totals.total < 100 || totals.total > 10_000_000) return json({ error: 'Valor do pedido inválido.' }, 400);
     const itemCount = cart.reduce((total, item) => total + item.quantity, 0) + (extraCents > 0 ? 1 : 0);
+    const utms = record(raw.utms) ? (raw.utms as Record<string, string>) : {};
 
     const key = gatewayKey(apiKey);
     const isBlackCat = key.startsWith('sk_');
@@ -201,25 +202,38 @@ export async function createPixResponse(request: Request, apiKey = ''): Promise<
         ? `${mainTitle} – Encanto Natalino`.slice(0, 100)
         : `${mainTitle} + itens – Encanto Natalino`.slice(0, 100);
 
+      const venoBody: Record<string, unknown> = {
+        amount: totals.total,
+        description,
+        external_id: raw.orderId as string,
+        payer: {
+          name: checkout.nome.trim(),
+          email: checkout.email.trim().toLowerCase(),
+          document: digits(checkout.cpf),
+          phone: digits(checkout.telefone),
+          address: `${checkout.endereco.trim()}, ${checkout.numero.trim()}${checkout.complemento ? ' - ' + checkout.complemento.trim() : ''}`,
+          city: checkout.cidade.trim(),
+          state: checkout.estado.trim().slice(0, 2).toUpperCase(),
+          zip_code: digits(checkout.cep),
+        },
+        products: venoProducts,
+        utm_source: text(utms.utm_source, 100) ? utms.utm_source : undefined,
+        utm_campaign: text(utms.utm_campaign, 100) ? utms.utm_campaign : undefined,
+        utm_medium: text(utms.utm_medium, 100) ? utms.utm_medium : undefined,
+        utm_content: text(utms.utm_content, 100) ? utms.utm_content : undefined,
+        utm_term: text(utms.utm_term, 100) ? utms.utm_term : undefined,
+        src: text(utms.src, 100) ? utms.src : undefined,
+        sck: text(utms.sck, 100) ? utms.sck : undefined,
+      };
+
+      for (const k of Object.keys(venoBody)) {
+        if (venoBody[k] === undefined) delete venoBody[k];
+      }
+
       // Veno Payments API PIX (POST /api/v1/pix)
       upstream = await requestGateway('/pix', key, {
         method: 'POST',
-        body: JSON.stringify({
-          amount: totals.total,
-          description,
-          external_id: raw.orderId as string,
-          payer: {
-            name: checkout.nome.trim(),
-            email: checkout.email.trim().toLowerCase(),
-            document: digits(checkout.cpf),
-            phone: digits(checkout.telefone),
-            address: `${checkout.endereco.trim()}, ${checkout.numero.trim()}${checkout.complemento ? ' - ' + checkout.complemento.trim() : ''}`,
-            city: checkout.cidade.trim(),
-            state: checkout.estado.trim().slice(0, 2).toUpperCase(),
-            zip_code: digits(checkout.cep),
-          },
-          products: venoProducts,
-        }),
+        body: JSON.stringify(venoBody),
       });
     }
 

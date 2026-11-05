@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { categories, occasions, products } from '@/domain/catalog';
 import { trackFbPageView } from '@/domain/analytics';
+import { captureUtms, getStoredUtms } from '@/domain/utm';
 import { useStore } from '@/store';
 import { Brand, Icon, Modal, type IconName } from './ui';
 
@@ -35,6 +36,26 @@ export function Shell() {
   useEffect(() => {
     trackFbPageView();
   }, [location.pathname]);
+
+  useEffect(() => {
+    captureUtms();
+    const stored = getStoredUtms();
+    const currentParams = new URLSearchParams(window.location.search);
+    let missingAny = false;
+
+    for (const [key, val] of Object.entries(stored)) {
+      if (val && !currentParams.has(key)) {
+        currentParams.set(key, val);
+        missingAny = true;
+      }
+    }
+
+    if (missingAny) {
+      const newQuery = currentParams.toString();
+      const newUrl = `${window.location.pathname}${newQuery ? '?' + newQuery : ''}${window.location.hash}`;
+      window.history.replaceState(null, '', newUrl);
+    }
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     setMenu(false);

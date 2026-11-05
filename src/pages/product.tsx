@@ -6,6 +6,7 @@ import { useStore } from '@/store';
 import { EmptyState, Icon, PageFrame } from '@/components/ui';
 import { ProductCard } from '@/components/product-card';
 import { trackFbInitiateCheckout } from '@/domain/analytics';
+import { withUtms } from '@/domain/utm';
 import css from '@/styles/pages/produto.css?inline';
 
 export function ProductPage() {
@@ -163,7 +164,7 @@ export function ProductPage() {
         ),
       }))
     ) {
-      navigate('/checkout');
+      navigate(withUtms('/checkout'));
     }
   }
 
