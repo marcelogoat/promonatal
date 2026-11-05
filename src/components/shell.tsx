@@ -24,6 +24,7 @@ export function Shell() {
   const [cookie, setCookie] = useState(false);
   const count = data.cart.reduce((total, item) => total + item.quantity, 0);
   const bare = /^\/(checkout|pagamento|cartao)(\.html)?$/.test(location.pathname);
+  const isProduct = /^\/produto(\/.*)?$/.test(location.pathname);
 
   useEffect(() => {
     const timer = setInterval(() => setNotice((value) => (value + 1) % notices.length), 4500);
@@ -90,28 +91,30 @@ export function Shell() {
         </footer>
       )}
 
-      <nav className="footer-nav" aria-label="Navegação principal">
-        <NavLink to="/" end>
-          <Icon name="home" />
-          <span>Início</span>
-        </NavLink>
-        <Link to="/#busca">
-          <Icon name="search" />
-          <span>Buscar</span>
-        </Link>
-        <NavLink to="/carrinho">
-          <Icon name="bag" />
-          <span>Sacola{count ? ` (${count})` : ''}</span>
-        </NavLink>
-        <NavLink to="/acompanhar">
-          <Icon name="receipt" />
-          <span>Pedidos</span>
-        </NavLink>
-        <NavLink to="/contato">
-          <Icon name="help" />
-          <span>Ajuda</span>
-        </NavLink>
-      </nav>
+      {!isProduct && (
+        <nav className="footer-nav" aria-label="Navegação principal">
+          <NavLink to="/" end>
+            <Icon name="home" />
+            <span>Início</span>
+          </NavLink>
+          <Link to="/#busca">
+            <Icon name="search" />
+            <span>Buscar</span>
+          </Link>
+          <NavLink to="/carrinho">
+            <Icon name="bag" />
+            <span>Sacola{count ? ` (${count})` : ''}</span>
+          </NavLink>
+          <NavLink to="/acompanhar">
+            <Icon name="receipt" />
+            <span>Pedidos</span>
+          </NavLink>
+          <NavLink to="/contato">
+            <Icon name="help" />
+            <span>Ajuda</span>
+          </NavLink>
+        </nav>
+      )}
 
       <Modal title="Categorias" open={menu} onClose={() => setMenu(false)} drawer>
         <div className="menu-intro">

@@ -160,8 +160,9 @@
 
     
     .buybar{
-      position:fixed; left:0; right:0; z-index:49;
-      bottom:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+      position:fixed; left:0; right:0; z-index:90;
+      bottom:0;
+      padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px));
       display:flex; align-items:center; gap:14px;
       padding:11px 18px;
       background:#fff;
@@ -175,15 +176,36 @@
       display:block; font-size:18px; font-weight:800; letter-spacing:-.01em; color:var(--accent);
     }
     .buybar__total{ flex:none; }
-    .buybar__btn{ flex:1; min-width:0; min-height:52px; border-radius:999px; font-size:15px; }
-    @media (max-width:420px){
-      .product-page{ padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 104px); }
+    .buybar__btn{ flex:1; min-width:0; min-height:46px; border-radius:999px; font-size:15px; font-weight:700; }
+    @media (max-width:859.98px){
+      .product-page{ padding-bottom:calc(74px + env(safe-area-inset-bottom, 0px)); }
       .buybar{ gap:10px; padding-inline:14px; }
       .buybar__total strong{ font-size:17px; }
-      .buybar__btn{ padding-inline:12px; font-size:14px; }
-    }
-    @media (min-width:421px) and (max-width:859.98px){
-      .product-page{ padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 104px); }
+
+
+      .buybar__btn{ padding-inline:12px; font-size:14.5px; min-height:46px; }
+
+      .pdp{ gap:12px; padding:4px 0 8px; }
+      .crumbs{ padding:6px 0 2px; font-size:11.5px; gap:4px; }
+      .pdp__media{ border-radius:14px; }
+      .pdp__media > img{ max-height:36vh; width:100%; object-fit:contain; border-radius:14px 14px 0 0; }
+      .pdp__thumbs{ padding:6px 8px; gap:6px; }
+      .pdp__thumb{ width:44px; height:52px; border-radius:4px; }
+      .pdp__info{ gap:12px; }
+      .pdp__head{ gap:4px; }
+      .pdp__category{ font-size:10px; }
+      .pdp__name{ font-size:20px; line-height:1.25; }
+      .pdp__rating{ margin-top:0; font-size:12px; gap:6px; }
+      .pdp__prices{ gap:8px; }
+      .price--lg{ font-size:22px; }
+      .pdp__options{ gap:10px; margin:4px 0; }
+      .pdp__option-group{ gap:6px; }
+      .pdp__option-title{ font-size:12.5px; }
+      .pdp__pill{ padding:8px 12px; font-size:12.5px; }
+      .express-note{ padding:8px 12px; gap:8px; margin:4px 0; }
+      .express-note svg{ width:18px; height:18px; }
+      .express-note strong{ font-size:12px; }
+      .express-note p{ font-size:11.5px; }
     }
     @media (min-width:860px){
       .buybar{

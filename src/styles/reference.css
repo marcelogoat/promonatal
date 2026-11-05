@@ -405,6 +405,30 @@ body.drawer-lock{ overflow:hidden; }
 .notice svg{ width:17px; height:17px; flex:none; }
 .notice em{ font-style:normal; color:#FFD7DF; }
 
+@media (max-width: 640px) {
+  .notice {
+    min-height: 28px;
+    padding: 3px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .notice svg { width: 13px; height: 13px; }
+  .topbar__row {
+    min-height: 48px;
+    gap: 6px;
+    padding: 2px 8px;
+  }
+  .topbar__cart {
+    width: 36px;
+    height: 36px;
+  }
+  .topbar__menu {
+    width: 36px;
+    height: 36px;
+    margin-left: -4px;
+  }
+}
+
 
 .topbar__menu{
   display:inline-flex; align-items:center; justify-content:center;
