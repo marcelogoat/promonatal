@@ -13,7 +13,7 @@ import {
   validateCheckout,
   type CheckoutData,
 } from '@/domain/checkout';
-import { createOrder, isDeliveryMode } from '@/domain/storage';
+import { createOrder, isDeliveryMode, safeRandomUUID } from '@/domain/storage';
 import { createPix } from '@/domain/pix';
 import { trackGoogleConversion } from '@/domain/analytics';
 import { useStore } from '@/store';
@@ -243,7 +243,7 @@ export function CheckoutPage() {
       return;
     }
 
-    const id = `natal_${crypto.randomUUID()}`;
+    const id = `natal_${safeRandomUUID()}`;
     const cart = data.cart.map((item) => ({ ...item }));
     const coupon = data.coupon;
     setPaymentLoading(true);
@@ -833,10 +833,10 @@ export function CheckoutPage() {
             <span className="pbadge" title="American Express"><span className="pbadge__amex">AMEX</span></span>
             <span className="pbadge" title="Visa"><span className="pbadge__visa">VISA</span></span>
             <span className="pbadge" title="Diners Club">
-              <svg viewBox="0 0 24 16" width="24" height="15"><circle cx="8" cy="8" r="6" fill="#0079be"/><circle cx="16" cy="8" r="6" fill="#0079be" fill-opacity="0.6"/><path d="M12 4v8" stroke="#fff" stroke-width="1.5"/></svg>
+              <svg viewBox="0 0 24 16" width="24" height="15"><circle cx="8" cy="8" r="6" fill="#0079be"/><circle cx="16" cy="8" r="6" fill="#0079be" fillOpacity="0.6"/><path d="M12 4v8" stroke="#fff" strokeWidth="1.5"/></svg>
             </span>
             <span className="pbadge" title="Mastercard">
-              <svg viewBox="0 0 28 18" width="24" height="15"><circle cx="9" cy="9" r="8" fill="#eb001b"/><circle cx="19" cy="9" r="8" fill="#f79e1b" fill-opacity="0.85"/></svg>
+              <svg viewBox="0 0 28 18" width="24" height="15"><circle cx="9" cy="9" r="8" fill="#eb001b"/><circle cx="19" cy="9" r="8" fill="#f79e1b" fillOpacity="0.85"/></svg>
             </span>
             <span className="pbadge" title="Discover">
               <span className="pbadge__discover">DISCOVER</span>
@@ -851,7 +851,7 @@ export function CheckoutPage() {
               <img src="/assets/pix.png" alt="PIX" width={16} height={16} style={{ objectFit: 'contain' }} />
             </span>
             <span className="pbadge" title="Boleto Bancário">
-              <svg viewBox="0 0 26 18" width="22" height="15"><rect x="2" y="1" width="2" height="9" fill="#231f20"/><rect x="6" y="1" width="1" height="9" fill="#231f20"/><rect x="9" y="1" width="3" height="9" fill="#231f20"/><rect x="14" y="1" width="1" height="9" fill="#231f20"/><rect x="17" y="1" width="2" height="9" fill="#231f20"/><rect x="21" y="1" width="3" height="9" fill="#231f20"/><text x="1" y="14" font-size="4.2" font-weight="900" fill="#231f20">BOLETO</text></svg>
+              <svg viewBox="0 0 26 18" width="22" height="15"><rect x="2" y="1" width="2" height="9" fill="#231f20"/><rect x="6" y="1" width="1" height="9" fill="#231f20"/><rect x="9" y="1" width="3" height="9" fill="#231f20"/><rect x="14" y="1" width="1" height="9" fill="#231f20"/><rect x="17" y="1" width="2" height="9" fill="#231f20"/><rect x="21" y="1" width="3" height="9" fill="#231f20"/><text x="1" y="14" fontSize="4.2" fontWeight="900" fill="#231f20">BOLETO</text></svg>
             </span>
           </div>
 

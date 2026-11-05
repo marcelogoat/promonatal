@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { safeRandomUUID } from '@/domain/storage';
 import { Link, useSearchParams } from 'react-router-dom';
 import { DemoNotice, Icon, PageFrame, type IconName } from '@/components/ui';
 import { orderDate } from '@/components/order-summary';
@@ -55,7 +56,7 @@ export function SupportPage() {
       setError('Selecione um assunto e escreva ao menos 10 caracteres.');
       return;
     }
-    const id = `ticket_${crypto.randomUUID()}`;
+    const id = `ticket_${safeRandomUUID()}`;
     if (transact((state) => ({ ...state, tickets: [{ id, subject, email: email.trim(), message: message.trim(), createdAt: new Date().toISOString() }, ...state.tickets] }))) {
       setCreated(id);
       setMessage('');

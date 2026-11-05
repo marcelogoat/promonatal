@@ -93,7 +93,22 @@ export function decodeStore(serialized: string): StoreData {
   }
 }
 
-export function createOrder(data: CheckoutData, cart: CartItem[], coupon: string, orderBump: Order['orderBump'] = null, id = `natal_${crypto.randomUUID()}`, pix?: PixPayment): Order {
+export function safeRandomUUID(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    try {
+      return crypto.randomUUID();
+    } catch {
+      // fallback
+    }
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+export function createOrder(data: CheckoutData, cart: CartItem[], coupon: string, orderBump: Order['orderBump'] = null, id = `natal_${safeRandomUUID()}`, pix?: PixPayment): Order {
   if (!cart.length) throw new Error('Sua sacola está vazia.');
   for (const item of cart) if (productById(item.productId).sold_out) throw new Error('Remova o produto esgotado antes de continuar.');
   quote(cart, data.mode, coupon, orderBump?.priceCents ?? 0);
