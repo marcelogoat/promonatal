@@ -66,7 +66,7 @@ function apiPlugin(apiKey: string) {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
-    plugins: [react(), apiPlugin(env.BLACKCAT_SECRET_KEY ?? '')],
+    plugins: [react(), apiPlugin(env.VENO_API_KEY ?? env.VENO_SECRET_KEY ?? env.BLACKCAT_SECRET_KEY ?? '')],
     resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
     server: { port: 5173, strictPort: true },
   };
