@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { products, money } from '@/domain/catalog';
 import { addItem } from '@/domain/commerce';
@@ -56,6 +56,44 @@ export function ProductPage() {
     .slice(0, 4);
 
   const gallery = product.images && product.images.length > 0 ? product.images : [product.image];
+
+  /* ── Swipe gesture on main image ── */
+  const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
+  const mediaRef = useRef<HTMLElement>(null);
+
+  const goToImage = useCallback(
+    (dir: 1 | -1) => {
+      setActiveImg((prev) => {
+        const next = prev + dir;
+        if (next < 0) return gallery.length - 1;
+        if (next >= gallery.length) return 0;
+        return next;
+      });
+    },
+    [gallery.length]
+  );
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStart.current = { x: touch.clientX, y: touch.clientY, t: Date.now() };
+  }, []);
+
+  const onTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (!touchStart.current) return;
+      const touch = e.changedTouches[0];
+      const dx = touch.clientX - touchStart.current.x;
+      const dy = touch.clientY - touchStart.current.y;
+      const dt = Date.now() - touchStart.current.t;
+      touchStart.current = null;
+
+      // Only trigger if horizontal movement > 40px, more horizontal than vertical, and < 500ms
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2 && dt < 500) {
+        goToImage(dx < 0 ? 1 : -1);
+      }
+    },
+    [goToImage]
+  );
 
   const hasOptions = Boolean(product.options && product.options.length > 0);
   const unselectedOptions = hasOptions
@@ -141,7 +179,12 @@ export function ProductPage() {
         </nav>
 
         <section className="pdp">
-          <figure className="pdp__media">
+          <figure
+              className="pdp__media"
+              ref={mediaRef as React.RefObject<HTMLElement>}
+              onTouchStart={onTouchStart}
+              onTouchEnd={onTouchEnd}
+            >
             <img
               src={gallery[activeImg] || product.image}
               alt={product.name}
@@ -151,18 +194,30 @@ export function ProductPage() {
             />
             {product.sold_out && <span className="pitem__tag">Esgotado</span>}
             {gallery.length > 1 && (
-              <div className="pdp__thumbs">
-                {gallery.map((src, i) => (
-                  <button
-                    key={i}
-                    className={`pdp__thumb${i === activeImg ? ' is-active' : ''}`}
-                    onClick={() => setActiveImg(i)}
-                    aria-label={`Imagem ${i + 1}`}
-                  >
-                    <img src={src} alt="" width={80} height={100} loading="lazy" />
-                  </button>
-                ))}
-              </div>
+              <>
+                <div className="pdp__dots">
+                  {gallery.map((_, i) => (
+                    <button
+                      key={i}
+                      className={`pdp__dot${i === activeImg ? ' is-active' : ''}`}
+                      onClick={() => setActiveImg(i)}
+                      aria-label={`Imagem ${i + 1}`}
+                    />
+                  ))}
+                </div>
+                <div className="pdp__thumbs">
+                  {gallery.map((src, i) => (
+                    <button
+                      key={i}
+                      className={`pdp__thumb${i === activeImg ? ' is-active' : ''}`}
+                      onClick={() => setActiveImg(i)}
+                      aria-label={`Imagem ${i + 1}`}
+                    >
+                      <img src={src} alt="" width={80} height={100} loading="lazy" />
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
           </figure>
 

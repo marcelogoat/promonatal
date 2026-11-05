@@ -34,8 +34,22 @@
       box-shadow:var(--shadow);
       animation:pdp-rise .5s ease both;
     }
-    .pdp__media > img{ width:100%; height:auto; display:block; object-fit:contain; background:#fff; border-radius:var(--r-lg); }
+    .pdp__media > img{ width:100%; height:auto; display:block; object-fit:contain; background:#fff; border-radius:var(--r-lg); cursor:grab; }
+    .pdp__media > img:active{ cursor:grabbing; }
     .pdp__media .pitem__tag{ top:14px; left:14px; }
+
+    .pdp__dots{
+      display:flex; justify-content:center; gap:6px;
+      padding:8px 0 2px;
+    }
+    .pdp__dot{
+      width:8px; height:8px; border-radius:50%;
+      border:none; padding:0; cursor:pointer;
+      background:var(--line); transition:all .2s ease;
+    }
+    .pdp__dot.is-active{
+      background:var(--accent); width:20px; border-radius:4px;
+    }
     .pdp__thumbs{
       display:flex; gap:8px; flex-wrap:nowrap;
       padding:10px 8px; background:#f8f8f8;
