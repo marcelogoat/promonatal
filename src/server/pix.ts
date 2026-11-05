@@ -1,6 +1,6 @@
 import { productById } from '../domain/catalog';
 import { validateCheckout, type CheckoutData } from '../domain/checkout';
-import { isDeliveryMode, quote, type CartItem } from '../domain/commerce';
+import { isDeliveryMode, quote, deliveryModes, type CartItem } from '../domain/commerce';
 
 const VENO_API_URL = 'https://beta.venopayments.com/api/v1';
 const BLACKCAT_API_URL = 'https://api.blackcatoficial.com/api';
@@ -57,8 +57,11 @@ function cartFrom(value: unknown): CartItem[] {
   if (!Array.isArray(value) || !value.length || value.length > 100) throw new Error('Sacola inválida.');
   return value.map((line) => {
     if (!record(line) || typeof line.productId !== 'number' || typeof line.quantity !== 'number' || !text(line.message)) throw new Error('Sacola inválida.');
-    productById(line.productId);
-    return { productId: line.productId, quantity: line.quantity, message: line.message };
+    const product = productById(line.productId);
+    const variantTitle = typeof line.variantTitle === 'string' && line.variantTitle.length <= 100 ? line.variantTitle : undefined;
+    const variantId = typeof line.variantId === 'number' ? line.variantId : undefined;
+    const priceCents = typeof line.priceCents === 'number' && Number.isSafeInteger(line.priceCents) && line.priceCents > 0 ? line.priceCents : product.price_cents;
+    return { productId: line.productId, quantity: line.quantity, message: line.message, variantTitle, variantId, priceCents };
   });
 }
 
@@ -135,12 +138,74 @@ export async function createPixResponse(request: Request, apiKey = ''): Promise<
         }),
       });
     } else {
+      // Build detailed products list for Veno / Pagar.me
+      type VenoProduct = { external_ref: string; name: string; price: number; quantity: number };
+      const venoProducts: VenoProduct[] = [];
+
+      for (let i = 0; i < cart.length; i++) {
+        const item = cart[i];
+        const prod = productById(item.productId);
+        const name = item.variantTitle
+          ? `${prod.name} (${item.variantTitle})`
+          : prod.name;
+        const unitPrice = item.priceCents || prod.price_cents;
+        venoProducts.push({
+          external_ref: `${raw.orderId}_item_${i + 1}_${item.productId}`.slice(0, 50),
+          name: name.slice(0, 120),
+          price: unitPrice,
+          quantity: item.quantity,
+        });
+      }
+
+      // Order bump if selected
+      if (extraCents > 0) {
+        const bumpProd = productById(604);
+        venoProducts.push({
+          external_ref: `${raw.orderId}_bump_604`.slice(0, 50),
+          name: `${bumpProd.name} (Oferta Especial)`.slice(0, 120),
+          price: extraCents,
+          quantity: 1,
+        });
+      }
+
+      // Shipping line if not free
+      if (totals.shipping > 0) {
+        venoProducts.push({
+          external_ref: `${raw.orderId}_frete`.slice(0, 50),
+          name: `Frete: ${deliveryModes[checkout.mode].label}`.slice(0, 120),
+          price: totals.shipping,
+          quantity: 1,
+        });
+      }
+
+      // Guarantee sum(price * quantity) === totals.total down to the exact cent
+      const currentSum = venoProducts.reduce((sum, p) => sum + p.price * p.quantity, 0);
+      const diff = totals.total - currentSum;
+      if (diff !== 0 && venoProducts.length > 0) {
+        const adjusted = venoProducts[0].price + Math.floor(diff / venoProducts[0].quantity);
+        if (adjusted > 0) {
+          venoProducts[0].price = adjusted;
+          const remainder = totals.total - venoProducts.reduce((sum, p) => sum + p.price * p.quantity, 0);
+          if (remainder !== 0 && venoProducts[0].quantity === 1) {
+            venoProducts[0].price += remainder;
+          }
+        }
+      }
+
+      const firstProduct = productById(cart[0].productId);
+      const mainTitle = cart[0].variantTitle
+        ? `${firstProduct.name} (${cart[0].variantTitle})`
+        : firstProduct.name;
+      const description = cart.length === 1 && extraCents === 0
+        ? `${mainTitle} – Encanto Natalino`.slice(0, 100)
+        : `${mainTitle} + itens – Encanto Natalino`.slice(0, 100);
+
       // Veno Payments API PIX (POST /api/v1/pix)
       upstream = await requestGateway('/pix', key, {
         method: 'POST',
         body: JSON.stringify({
           amount: totals.total,
-          description: `Pedido ${raw.orderId} - Encanto Natalino`,
+          description,
           external_id: raw.orderId as string,
           payer: {
             name: checkout.nome.trim(),
@@ -152,14 +217,7 @@ export async function createPixResponse(request: Request, apiKey = ''): Promise<
             state: checkout.estado.trim().slice(0, 2).toUpperCase(),
             zip_code: digits(checkout.cep),
           },
-          products: [
-            {
-              external_ref: (raw.orderId as string).slice(0, 50),
-              name: `Pedido Encanto Natalino (${itemCount} ${itemCount === 1 ? 'item' : 'itens'})`,
-              price: totals.total,
-              quantity: 1,
-            },
-          ],
+          products: venoProducts,
         }),
       });
     }
