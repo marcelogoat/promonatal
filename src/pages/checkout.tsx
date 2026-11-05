@@ -42,9 +42,9 @@ export function CheckoutPage() {
   const [paymentError, setPaymentError] = useState('');
   const [orderBump, setOrderBump] = useState(false);
 
-  // Bump product: fixed to a complementary lights product (ID 407 - Luz Cintilante Bolha de Natal)
-  const bumpProduct = productById(407);
-  const bumpPrice = bumpProduct ? Math.round(bumpProduct.price_cents * 0.7) : 0;
+  // Bump product: Kit 32 Enfeites Azul, Branco e Prata (ID 604)
+  const bumpProduct = productById(604);
+  const bumpPrice = 3290; // R$32,90 fixo
 
   const orderTotals = quote(data.cart, values.mode, data.coupon, orderBump ? bumpPrice : 0);
 
@@ -436,7 +436,7 @@ export function CheckoutPage() {
                 mode={values.mode}
                 coupon={data.coupon}
                 extraCents={orderBump ? bumpPrice : 0}
-                extraLabel="Item adicional (30% OFF)"
+                extraLabel="Kit 32 Enfeites (Oferta Especial)"
               />
 
               <div className="checkout-security-seals">
@@ -785,8 +785,8 @@ export function CheckoutPage() {
                     className="order-bump__img"
                   />
                   <div className="order-bump__info">
-                    <strong>Adicionar Luz Cintilante Bolha de Natal com 30% OFF</strong>
-                    <p>Ilumina qualquer árvore ou ambiente com 115 LEDs cintilantes. Perfeito para completar sua decoração!</p>
+                    <strong>Adicionar Kit 32 Enfeites Azul, Branco e Prata</strong>
+                    <p>Conjunto elegante com 32 peças (bolas, gotas e pendentes) em tons azul e prata. Perfeito para complementar sua árvore!</p>
                     <div className="order-bump__price-row">
                       <span className="old-price">{money(bumpProduct.price_cents)}</span>
                       <span className="new-price">{money(bumpPrice)}</span>

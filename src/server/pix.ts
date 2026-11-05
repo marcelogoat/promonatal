@@ -73,8 +73,8 @@ export async function createPixResponse(request: Request, apiKey = ''): Promise<
     const checkout = checkoutFrom(raw.checkout);
     const cart = cartFrom(raw.cart);
     const extraCents = typeof raw.extraCents === 'number' && Number.isSafeInteger(raw.extraCents) && raw.extraCents >= 0 ? raw.extraCents : 0;
-    // Bump is always product 407 (Luz Cintilante Bolha de Natal) at 70% of price
-    const expectedBump = extraCents > 0 ? Math.round(productById(407).price_cents * 0.7) : 0;
+    // Bump is product 604 (Kit 32 Enfeites Azul, Branco e Prata) at R$ 32,90
+    const expectedBump = extraCents > 0 ? 3290 : 0;
     if (extraCents !== expectedBump) return json({ error: 'Oferta adicional inválida.' }, 400);
     const totals = quote(cart, checkout.mode, raw.coupon as string, extraCents);
     if (totals.total < 100 || totals.total > 10_000_000) return json({ error: 'Valor do pedido inválido.' }, 400);
