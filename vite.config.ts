@@ -41,10 +41,11 @@ function apiPlugin(apiKey: string) {
         }
         chunks.push(bytes);
       }
+      const rawBody = Buffer.concat(chunks).toString('utf-8');
       const request = new Request('http://localhost/api/pix/create', {
         method: 'POST',
         headers: { 'Content-Type': req.headers['content-type'] ?? 'application/json' },
-        body: Buffer.concat(chunks),
+        body: rawBody,
       });
       await sendResponse(await createPixResponse(request, apiKey), res);
       return;
