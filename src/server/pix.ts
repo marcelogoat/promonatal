@@ -1,6 +1,7 @@
 import { productById } from '../domain/catalog';
 import { validateCheckout, type CheckoutData } from '../domain/checkout';
 import { isDeliveryMode, quote, deliveryModes, type CartItem } from '../domain/commerce';
+import { sendMetaConversionPurchase } from './meta';
 
 const VENO_API_URL = 'https://beta.venopayments.com/api/v1';
 const BLACKCAT_API_URL = 'https://api.blackcatoficial.com/api';
@@ -301,6 +302,30 @@ export async function createPixResponse(request: Request, apiKey = ''): Promise<
         expiresAt,
       },
     };
+
+    // Send Server-Side Conversion to Meta (CAPI) with automatic deduplication
+    try {
+      const contentIds = cart.map((i) => i.productId);
+      if (extraCents > 0) contentIds.push(604);
+      sendMetaConversionPurchase({
+        orderId: raw.orderId as string,
+        valueCents: totals.total,
+        contentIds,
+        numItems: itemCount,
+        customer: {
+          nome: checkout.nome,
+          email: checkout.email,
+          telefone: checkout.telefone,
+          cidade: checkout.cidade,
+          estado: checkout.estado,
+          cep: checkout.cep,
+        },
+        request,
+      }).catch((err) => console.warn('[Meta CAPI] error sending purchase:', err));
+    } catch (metaErr) {
+      console.warn('[Meta CAPI] failed to dispatch:', metaErr);
+    }
+
     return json(payment, 201);
   } catch (error) {
     if (error instanceof SyntaxError) return json({ error: 'Corpo da requisição inválido.' }, 400);

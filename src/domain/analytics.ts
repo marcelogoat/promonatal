@@ -96,14 +96,19 @@ export function trackFbPurchase(
   const fbq = ensureFbq();
   const valueInReais = Number((valueCents / 100).toFixed(2));
 
-  fbq('track', 'Purchase', {
-    value: valueInReais,
-    currency: 'BRL',
-    transaction_id: orderId,
-    content_ids: contentIds.map(String),
-    content_type: 'product',
-    num_items: numItems,
-  });
+  fbq(
+    'track',
+    'Purchase',
+    {
+      value: valueInReais,
+      currency: 'BRL',
+      transaction_id: orderId,
+      content_ids: contentIds.map(String),
+      content_type: 'product',
+      num_items: numItems,
+    },
+    { eventID: orderId }
+  );
 
   console.log('[Meta Pixel] Purchase registrado:', {
     value: valueInReais,
